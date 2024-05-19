@@ -23,6 +23,18 @@ import { auth } from '@/auth'
 import { AppointmentSlots } from '@/components/appointments/appointment-slots'
 import { spinner } from '@/components/appointments'
 
+let initialData = z.object({
+  appointmentSlots: z.array(
+    z.object({
+      id: z.number().describe('A unique ID for this appointment'),
+      time: z
+        .string()
+        .describe('The date and time of the event, in ISO-8601 format'),
+      durationMinutes: z.number().describe('The time in minutes of the appointment'),
+      doctor: z.string().describe('The doctor available for this slot')
+    })
+  )
+})
 async function confirmAppointment(appointmentSlot: {id: number, time: string, durationMinutes: number, doctor: string}) {
   'use server'
   const {id, time, durationMinutes, doctor} = appointmentSlot;
@@ -46,7 +58,7 @@ async function confirmAppointment(appointmentSlot: {id: number, time: string, du
       <div className="inline-flex items-start gap-1 md:items-center">
         {spinner}
         <p className="mb-2">
-        Selecting appointment {id} ... working on it...
+        Selecting appointment {id} ... working on it... 
         </p>
       </div>
     )
@@ -120,6 +132,8 @@ async function submitUserMessage(content: string) {
     - "[Chose appointment 4]" means that the user has chosen the appointment with id number 4 in the UI..
     
     If the user requests to view open appoinements, call \`list_appointment_slots\` to show the open appointments UI.
+    If the user wants to create an open appointment slot, call \`create_appointment_slots\` to allow user to make one.
+    If user wants to view menu, 
     If the user wants to do something unrelated to discussing the clinic or its appointments, respond that you are a demo and cannot do that.
     
     Besides that, you can also chat with users.`,
@@ -131,7 +145,7 @@ async function submitUserMessage(content: string) {
       }))
     ],
     text: ({ content, done, delta }) => {
-      if (!textStream) {
+      if (!textStream) { 
         textStream = createStreamableValue('')
         textNode = <BotMessage content={textStream.value} />
       }
@@ -158,18 +172,7 @@ async function submitUserMessage(content: string) {
     tools: {
       listAppointmentSlots: {
         description: 'List open appointment slots.',
-        parameters: z.object({
-          appointmentSlots: z.array(
-            z.object({
-              id: z.number().describe('A unique ID for this appointment'),
-              time: z
-                .string()
-                .describe('The date and time of the event, in ISO-8601 format'),
-              durationMinutes: z.number().describe('The time in minutes of the appointment'),
-              doctor: z.string().describe('The doctor available for this slot')
-            })
-          )
-        }),
+        parameters: initialData,
         generate: async function* ({ appointmentSlots }) {
           yield (
             <BotCard>
@@ -200,11 +203,35 @@ async function submitUserMessage(content: string) {
               },
               {
                 id: nanoid(),
+                role: 'assistant',
+                content: [
+                  {
+                    type: 'tool-call',
+                    toolName: 'createAppointmentSlots',
+                    toolCallId,
+                    args: { appointmentSlots }
+                  }
+                ]
+              },
+              {
+                id: nanoid(),
                 role: 'tool',
                 content: [
                   {
                     type: 'tool-result',
                     toolName: 'listAppointmentSlots',
+                    toolCallId,
+                    result: appointmentSlots
+                  }
+                ]
+              },
+              {
+                id: nanoid(),
+                role: 'tool',
+                content: [
+                  {
+                    type: 'tool-result',
+                    toolName: 'createAppointmentSlots',
                     toolCallId,
                     result: appointmentSlots
                   }
@@ -220,6 +247,59 @@ async function submitUserMessage(content: string) {
           )
         }
       },
+      createAppointmentSlots: {
+        description: 'Create an open appointment slot.',
+        parameters: initialData,
+        generate: async function* ({ appointmentSlots }) {
+          yield (
+            <BotCard>
+              {/* <AppointmentsSkeleton /> */}
+              Temp skeleton for now
+            </BotCard>
+          )
+
+          await sleep(1000)
+
+          const toolCallId = nanoid()
+
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'assistant',
+                content: [
+                  {
+                    type: 'tool-call',
+                    toolName: 'createAppointmentSlots',
+                    toolCallId,
+                    args: { appointmentSlots }
+                  }
+                ]
+              },
+              {
+                id: nanoid(),
+                role: 'tool',
+                content: [
+                  {
+                    type: 'tool-result',
+                    toolName: 'createAppointmentSlots',
+                    toolCallId,
+                    result: appointmentSlots
+                  }
+                ]
+              }
+            ]
+          })
+
+          return (
+            <BotCard>
+              <AppointmentSlots props={appointmentSlots} />
+            </BotCard>
+          )
+        }
+      }
     }
   })
 
@@ -301,13 +381,23 @@ export const getUIStateFromAIState = (aiState: Chat) => {
       display:
         message.role === 'tool' ? (
           message.content.map(tool => {
-            return tool.toolName === 'listAppointmentSlots' ? (
+            if (tool.toolName === 'listAppointmentSlots' ) 
+              return (
               <BotCard>
                 {/* TODO: Infer types based on the tool result*/}
                 {/* @ts-expect-error */}
                 <AppointmentSlots props={tool.result} />
               </BotCard>
-            ) : null
+            )
+            else if (tool.toolName === 'createAppointmentSlots' )
+              return (
+                <BotCard>
+                  {/* TODO: Infer types based on the tool result*/}
+                  {/* @ts-expect-error */}
+                  <CreateAppointmentSlots props={tool.result} />
+                </BotCard>
+              )
+              else return null
           })
         ) : message.role === 'user' ? (
           <UserMessage>{message.content as string}</UserMessage>

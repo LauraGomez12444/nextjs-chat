@@ -44,6 +44,11 @@ export function ChatPanel({
       heading: 'More info',
       subheading: 'about the clinic',
       message: 'Tell me more about this clinic'
+    },
+    {
+      heading: 'Create',
+      subheading: 'an appointment slot',
+      message: 'Create an appointment slot'
     }
   ]
 
