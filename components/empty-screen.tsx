@@ -12,7 +12,7 @@ export function EmptyScreen() {
           Welcome to Next.js AI Chatbot!
         </h1>
         <p className="leading-normal text-muted-foreground">
-          This is an open source AI chatbot app template built with{' '}
+          This is an open source AI chatbot tool built with the amazing{' '}
           <ExternalLink href="https://nextjs.org">Next.js</ExternalLink>, the{' '}
           <ExternalLink href="https://sdk.vercel.ai">
             Vercel AI SDK
