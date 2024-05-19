@@ -23,6 +23,10 @@ import { auth } from '@/auth'
 import { AppointmentSlots, CreateAppointmentSlots } from '@/components/appointments/appointment-slots'
 import { spinner } from '@/components/appointments'
 
+const fakeData = [
+  {id: 1, time: '',}
+]
+
 let initialData = z.object({
   appointmentSlots: z.array(
     z.object({
@@ -174,6 +178,7 @@ async function submitUserMessage(content: string) {
         description: 'List open appointment slots.',
         parameters: initialData,
         generate: async function* ({ appointmentSlots }) {
+
           yield (
             <BotCard>
               {/* <AppointmentsSkeleton /> */}
@@ -203,35 +208,11 @@ async function submitUserMessage(content: string) {
               },
               {
                 id: nanoid(),
-                role: 'assistant',
-                content: [
-                  {
-                    type: 'tool-call',
-                    toolName: 'createAppointmentSlots',
-                    toolCallId,
-                    args: { appointmentSlots }
-                  }
-                ]
-              },
-              {
-                id: nanoid(),
                 role: 'tool',
                 content: [
                   {
                     type: 'tool-result',
                     toolName: 'listAppointmentSlots',
-                    toolCallId,
-                    result: appointmentSlots
-                  }
-                ]
-              },
-              {
-                id: nanoid(),
-                role: 'tool',
-                content: [
-                  {
-                    type: 'tool-result',
-                    toolName: 'createAppointmentSlots',
                     toolCallId,
                     result: appointmentSlots
                   }
