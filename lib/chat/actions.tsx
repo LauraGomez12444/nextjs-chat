@@ -20,7 +20,7 @@ import { saveChat } from '@/app/actions'
 import { BotCard, BotMessage, SpinnerMessage, SystemMessage, UserMessage } from '@/components/appointments/message'
 import { Chat, Message } from '@/lib/types'
 import { auth } from '@/auth'
-import { AppointmentSlots } from '@/components/appointments/appointment-slots'
+import { AppointmentSlots, CreateAppointmentSlots } from '@/components/appointments/appointment-slots'
 import { spinner } from '@/components/appointments'
 
 let initialData = z.object({
