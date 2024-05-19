@@ -113,7 +113,7 @@ async function submitUserMessage(content: string) {
     model: openai('gpt-3.5-turbo'),
     initial: <SpinnerMessage />,
     system: `\
-    You are a appointment scheduling bot and you can help users schedule their appointments at a clinic, step by step.
+    You are an appointment scheduling bot and you can help users schedule their appointments at a clinic, step by step.
     You and the user can discuss available appointment times and the user can view appointments and select one in the UI.
     
     Messages inside [] means that it's a UI element or a user event. For example:
