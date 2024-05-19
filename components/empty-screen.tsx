@@ -32,6 +32,10 @@ export function EmptyScreen() {
           is synced through the SDK so the model is aware of your interactions
           as they happen.
         </p>
+        <p className="leading-normal text-muted-foreground">
+          Please start chatting!
+         
+        </p>
       </div>
     </div>
   )
