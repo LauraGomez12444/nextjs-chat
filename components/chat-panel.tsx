@@ -49,6 +49,11 @@ export function ChatPanel({
       heading: 'Create',
       subheading: 'an appointment slot',
       message: 'Create an appointment slot'
+    },
+    {
+      heading: 'Cancel',
+      subheading: 'an appointment slot',
+      message: 'Cancel an appointment'
     }
   ]
 
@@ -88,7 +93,7 @@ export function ChatPanel({
                 }}
               >
                 <div className="text-lg font-semibold">{example.heading}</div>
-                <div className="text-sm text-zinc-600">
+                <div className="text-sm text-zinc-250">
                   {example.subheading}
                 </div>
               </div>

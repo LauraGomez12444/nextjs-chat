@@ -137,7 +137,7 @@ async function submitUserMessage(content: string) {
     
     If the user requests to view open appoinements, call \`list_appointment_slots\` to show the open appointments UI.
     If the user wants to create an open appointment slot, call \`create_appointment_slots\` to allow user to make one.
-    If user wants to view menu, 
+    If user wants to cancel a previously made appointment, call \`cancel_appointment_slot\` to allow user to delete it.
     If the user wants to do something unrelated to discussing the clinic or its appointments, respond that you are a demo and cannot do that.
     
     Besides that, you can also chat with users.`,
@@ -213,6 +213,60 @@ async function submitUserMessage(content: string) {
                   {
                     type: 'tool-result',
                     toolName: 'listAppointmentSlots',
+                    toolCallId,
+                    result: appointmentSlots
+                  }
+                ]
+              }
+            ]
+          })
+
+          return (
+            <BotCard>
+              <AppointmentSlots props={appointmentSlots} />
+            </BotCard>
+          )
+        }
+      },
+      cancelAppointmentSlots: {
+        description: 'Cancel a previous appointment slots.',
+        parameters: initialData,
+        generate: async function* ({ appointmentSlots }) {
+
+          yield (
+            <BotCard>
+              {/* <AppointmentsSkeleton /> */}
+              Temp skeleton for now
+            </BotCard>
+          )
+
+          await sleep(1000)
+
+          const toolCallId = nanoid()
+
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'assistant',
+                content: [
+                  {
+                    type: 'tool-call',
+                    toolName: 'cancelAppointmentSlots',
+                    toolCallId,
+                    args: { appointmentSlots }
+                  }
+                ]
+              },
+              {
+                id: nanoid(),
+                role: 'tool',
+                content: [
+                  {
+                    type: 'tool-result',
+                    toolName: 'cancelAppointmentSlots',
                     toolCallId,
                     result: appointmentSlots
                   }
@@ -378,6 +432,14 @@ export const getUIStateFromAIState = (aiState: Chat) => {
                   <CreateAppointmentSlots props={tool.result} />
                 </BotCard>
               )
+              else if (tool.toolName === 'cancelAppointmentSlots' )
+                return (
+                  <BotCard>
+                    {/* TODO: Infer types based on the tool result*/}
+                    {/* @ts-expect-error */}
+                    <CreateAppointmentSlots props={tool.result} />
+                  </BotCard>
+                )
               else return null
           })
         ) : message.role === 'user' ? (
